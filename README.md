@@ -29,8 +29,44 @@ Run the training script (which automatically executes the preprocessing script):
 python train_models.py
 ```
 
-**2. Make Predictions**
+**2. Make Predictions (CLI)**
 After models are trained, use the predict script:
 ```bash
 python predict.py
 ```
+
+**3. Run the Prediction API (FastAPI)**
+We have a FastAPI application with a `/predict` endpoint that uses the single best tuned model. The models were evaluated using 5-fold cross-validation with the following test set performance:
+
+- **Linear Regression**: RMSE = 13.9318, R2 = 0.8804
+- **Random Forest (Tuned)**: RMSE = 14.1678, R2 = 0.8763
+- **Gradient Boosting (Tuned)**: RMSE = 13.5614, R2 = 0.8867
+
+*The best overall model was Gradient Boosting with an R2 of 0.8867.*
+
+To run the API:
+
+```bash
+uvicorn app:app --reload
+```
+
+Then you can send a POST request with JSON data to `http://localhost:8000/predict`.
+
+**API Usage with `curl`:**
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/predict' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "gender": "female",
+  "race/ethnicity": "group B",
+  "parental level of education": "bachelor'\''s degree",
+  "lunch": "standard",
+  "test preparation course": "none",
+  "reading score": 72,
+  "writing score": 74
+}'
+```
+
+You can also visit `http://localhost:8000/docs` to test the API directly using Swagger UI.
