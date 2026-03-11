@@ -1,0 +1,18 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Data
+StudentsPerformance.csv
+data/
+
+# Generated outputs
+plots/
+models/
+__pycache__/
+*.joblib
