@@ -1,10 +1,19 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 import joblib
 import pandas as pd
 import os
 
 app = FastAPI(title="Student Math Score Predictor API")
+
+# Mount the static directory to serve index.html
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+async def read_index():
+    return FileResponse("static/index.html")
 
 # Load models at startup
 preprocessor_path = 'models/preprocessor.joblib'

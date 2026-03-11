@@ -44,13 +44,15 @@ We have a FastAPI application with a `/predict` endpoint that uses the single be
 
 *The best overall model was Gradient Boosting with an R2 of 0.8867.*
 
-To run the API:
+To run the API and Web Interface:
 
 ```bash
 uvicorn app:app --reload
 ```
 
-Then you can send a POST request with JSON data to `http://localhost:8000/predict`.
+Then you can:
+1. **Use the Web UI**: Open `http://localhost:8000/` in your browser.
+2. **Access the API Docs**: Visit `http://localhost:8000/docs`.
 
 **API Usage with `curl`:**
 ```bash

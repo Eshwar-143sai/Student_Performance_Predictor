@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Math Score Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            color: #333;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="glass-panel w-full max-w-2xl p-8 mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-2 text-indigo-900">Student Math Score Predictor</h1>
+        <p class="text-center text-gray-600 mb-8">Enter the student's details below to predict their math score.</p>
+
+        <form id="prediction-form" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Gender -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <select id="gender" name="gender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                    </select>
+                </div>
+
+                <!-- Race/Ethnicity -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Race/Ethnicity</label>
+                    <select id="race/ethnicity" name="race/ethnicity" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                        <option value="group A">Group A</option>
+                        <option value="group B">Group B</option>
+                        <option value="group C">Group C</option>
+                        <option value="group D">Group D</option>
+                        <option value="group E">Group E</option>
+                    </select>
+                </div>
+
+                <!-- Parental Education -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Parental Level of Education</label>
+                    <select id="parental level of education" name="parental level of education" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                        <option value="some high school">Some High School</option>
+                        <option value="high school">High School</option>
+                        <option value="some college">Some College</option>
+                        <option value="associate's degree">Associate's Degree</option>
+                        <option value="bachelor's degree">Bachelor's Degree</option>
+                        <option value="master's degree">Master's Degree</option>
+                    </select>
+                </div>
+
+                <!-- Lunch -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Lunch</label>
+                    <select id="lunch" name="lunch" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                        <option value="standard">Standard</option>
+                        <option value="free/reduced">Free/Reduced</option>
+                    </select>
+                </div>
+
+                <!-- Test Prep -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Test Preparation Course</label>
+                    <select id="test preparation course" name="test preparation course" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                        <option value="none">None</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+
+                <!-- Scores -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reading Score (0-100)</label>
+                    <input type="number" id="reading score" name="reading score" min="0" max="100" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm" placeholder="e.g. 75">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Writing Score (0-100)</label>
+                    <input type="number" id="writing score" name="writing score" min="0" max="100" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm" placeholder="e.g. 80">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg text-lg transition duration-200 shadow-md flex items-center justify-center">
+                <span>Predict Math Score</span>
+                <svg id="loading-spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </form>
+
+        <div id="result-container" class="mt-8 hidden">
+            <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center transform transition-all duration-500 scale-95 opacity-0" id="result-box">
+                <h2 class="text-xl text-green-800 font-semibold mb-2">Predicted Math Score</h2>
+                <div class="text-5xl font-extrabold text-green-600" id="predicted-score">--</div>
+            </div>
+        </div>
+
+        <div id="error-container" class="mt-8 hidden">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                <p class="text-red-600 font-medium" id="error-message">An error occurred.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert numerical scores
+            data['reading score'] = parseInt(data['reading score']);
+            data['writing score'] = parseInt(data['writing score']);
+
+            const btnText = form.querySelector('button span');
+            const spinner = document.getElementById('loading-spinner');
+            const resultContainer = document.getElementById('result-container');
+            const resultBox = document.getElementById('result-box');
+            const scoreDisplay = document.getElementById('predicted-score');
+            const errorContainer = document.getElementById('error-container');
+
+            // UI Loading state
+            btnText.textContent = 'Predicting...';
+            spinner.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            errorContainer.classList.add('hidden');
+            resultBox.classList.remove('scale-100', 'opacity-100');
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                // Show result
+                scoreDisplay.textContent = Math.round(result.predicted_math_score * 10) / 10;
+                resultContainer.classList.remove('hidden');
+                
+                // Trigger animation
+                setTimeout(() => {
+                    resultBox.classList.add('scale-100', 'opacity-100');
+                }, 50);
+
+            } catch (error) {
+                console.error('Error:', error);
+                errorContainer.classList.remove('hidden');
+                document.getElementById('error-message').textContent = "Failed to get prediction: " + error.message;
+            } finally {
+                // UI Reset state
+                btnText.textContent = 'Predict Math Score';
+                spinner.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
