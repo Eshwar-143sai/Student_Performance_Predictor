@@ -14,9 +14,9 @@ def evaluate_model(true, predicted):
     return rmse, r2
 
 def main():
-    filepath = 'StudentsPerformance.csv'
+    filepath = 'student_data.csv'
     if not os.path.exists(filepath):
-        print(f"Dataset '{filepath}' not found. Please place it in the project root or run generate_mock_data.py")
+        print(f"Dataset '{filepath}' not found. Please place it in the project root.")
         return
 
     print(f"Loading and preprocessing data from {filepath}...\n")
@@ -54,7 +54,10 @@ def main():
         print(f"\nTraining {name}...")
         
         if param_grids[name]:
-            grid_search = GridSearchCV(estimator=model, param_grid=param_grids[name], cv=5, scoring='r2', n_jobs=-1, verbose=1)
+            grid_search = GridSearchCV(
+                estimator=model, param_grid=param_grids[name],
+                cv=5, scoring='r2', n_jobs=-1, verbose=1
+            )
             grid_search.fit(X_train, y_train)
             best_tuned_model = grid_search.best_estimator_
             print(f"Best Parameters for {name}: {grid_search.best_params_}")

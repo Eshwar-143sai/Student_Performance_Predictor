@@ -3,182 +3,837 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Math Score Predictor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Student Performance Predictor</title>
+    <meta name="description" content="Predict student grades and get personalized study improvement suggestions with YouTube resources.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Inter', sans-serif;
-            color: #333;
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(30, 30, 50, 0.8);
+            --bg-card-hover: rgba(40, 40, 65, 0.9);
+            --accent-1: #667eea;
+            --accent-2: #764ba2;
+            --accent-3: #f093fb;
+            --accent-green: #00d4aa;
+            --accent-yellow: #ffd700;
+            --accent-red: #ff6b6b;
+            --accent-blue: #4facfe;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6b6b80;
+            --border: rgba(102, 126, 234, 0.2);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --radius: 16px;
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(240, 147, 251, 0.08) 0%, transparent 50%);
+            z-index: 0;
+            animation: bgShift 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgShift {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+
+        .container {
+            position: relative; z-index: 1;
+            max-width: 1000px; margin: 0 auto;
+            padding: 24px 20px 60px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center; padding: 40px 0 32px;
+        }
+        .header h1 {
+            font-size: 2.4rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 8px;
+        }
+        .header p {
+            color: var(--text-secondary); font-size: 1.05rem; font-weight: 300;
+        }
+
+        /* Tab navigation */
+        .tabs {
+            display: flex; gap: 4px; margin-bottom: 28px;
+            background: var(--bg-secondary); border-radius: 14px; padding: 4px;
+        }
+        .tab {
+            flex: 1; padding: 14px 20px; text-align: center;
+            border: none; background: transparent; color: var(--text-secondary);
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+            cursor: pointer; border-radius: 11px; transition: all 0.3s ease;
+        }
+        .tab:hover { color: var(--text-primary); }
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Panels */
+        .panel { display: none; animation: fadeIn 0.4s ease; }
+        .panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 28px; margin-bottom: 20px;
+            backdrop-filter: blur(20px); box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+        .card-title {
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .card-title .icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        }
+
+        /* Form elements */
+        .form-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label {
+            font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);
+            margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-group select, .form-group input {
+            padding: 12px 14px; border-radius: 10px;
+            border: 1px solid var(--border); background: rgba(15, 15, 26, 0.6);
+            color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 0.9rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            outline: none;
+        }
+        .form-group select:focus, .form-group input:focus {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        .form-group select option { background: var(--bg-secondary); color: var(--text-primary); }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: white; font-family: 'Inter', sans-serif; font-size: 1rem;
+            font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-top: 24px; position: relative; overflow: hidden;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary.loading { pointer-events: none; opacity: 0.8; }
+
+        .spinner {
+            width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.8s linear infinite; display: none;
+        }
+        .btn-primary.loading .spinner { display: block; }
+        .btn-primary.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Result display */
+        .result-area { margin-top: 28px; display: none; animation: slideUp 0.5s ease; }
+        .result-area.visible { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grade-display {
+            text-align: center; padding: 32px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+            border-radius: var(--radius); border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .grade-display .grade-value {
+            font-size: 4rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; line-height: 1;
+        }
+        .grade-display .grade-max { font-size: 1.5rem; color: var(--text-muted); font-weight: 300; }
+        .grade-display .grade-level {
+            margin-top: 8px; font-size: 1.1rem; font-weight: 600;
+            padding: 6px 18px; border-radius: 20px; display: inline-block;
+        }
+        .grade-level.green { background: rgba(0,212,170,0.15); color: var(--accent-green); }
+        .grade-level.blue { background: rgba(79,172,254,0.15); color: var(--accent-blue); }
+        .grade-level.yellow { background: rgba(255,215,0,0.15); color: var(--accent-yellow); }
+        .grade-level.red { background: rgba(255,107,107,0.15); color: var(--accent-red); }
+
+        /* Grade bar */
+        .grade-bar-container { margin: 20px 0 8px; }
+        .grade-bar-bg {
+            width: 100%; height: 10px; background: rgba(255,255,255,0.1);
+            border-radius: 5px; overflow: hidden;
+        }
+        .grade-bar-fill {
+            height: 100%; border-radius: 5px; transition: width 1s ease;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-yellow), var(--accent-green));
+        }
+        .grade-bar-labels {
+            display: flex; justify-content: space-between;
+            font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;
+        }
+
+        /* Suggestions */
+        .suggestions-title {
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .suggestion-item {
+            display: flex; gap: 14px; padding: 16px;
+            background: rgba(15,15,26,0.5); border-radius: 12px;
+            border: 1px solid var(--border); margin-bottom: 10px;
+            transition: background 0.2s;
+        }
+        .suggestion-item:hover { background: rgba(25,25,40,0.7); }
+        .suggestion-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+        .suggestion-content { flex: 1; }
+        .suggestion-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+        .suggestion-detail { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+        .priority-badge {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px;
+        }
+        .priority-badge.high { background: rgba(255,107,107,0.15); color: var(--accent-red); }
+        .priority-badge.medium { background: rgba(255,215,0,0.15); color: var(--accent-yellow); }
+        .priority-badge.low { background: rgba(0,212,170,0.15); color: var(--accent-green); }
+
+        /* Study Help Panel */
+        .study-input-area {
+            display: flex; gap: 12px; flex-wrap: wrap;
+        }
+        .study-input-area .form-group { flex: 1; min-width: 200px; }
+        .study-results { margin-top: 24px; display: none; animation: fadeIn 0.4s ease; }
+        .study-results.visible { display: block; }
+
+        .explanation-box {
+            padding: 20px; border-radius: 12px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
+            border: 1px solid var(--border); margin-bottom: 20px;
+            line-height: 1.7; font-size: 0.95rem; color: var(--text-secondary);
+        }
+        .explanation-box strong { color: var(--text-primary); }
+
+        .subtopics {
+            display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0;
+        }
+        .subtopic-tag {
+            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            background: rgba(102,126,234,0.15); color: var(--accent-1);
+            border: 1px solid rgba(102,126,234,0.3); cursor: pointer;
+            transition: all 0.2s;
+        }
+        .subtopic-tag:hover {
+            background: rgba(102,126,234,0.3);
+            transform: translateY(-1px);
+        }
+
+        .links-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;
+        }
+        .link-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; border-radius: 12px;
+            background: rgba(15,15,26,0.5); border: 1px solid var(--border);
+            text-decoration: none; color: var(--text-primary);
+            transition: all 0.2s; font-size: 0.9rem; font-weight: 500;
+        }
+        .link-card:hover {
+            background: rgba(25,25,40,0.7);
+            border-color: var(--accent-1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .link-card .arrow { margin-left: auto; color: var(--text-muted); transition: transform 0.2s; }
+        .link-card:hover .arrow { transform: translateX(4px); color: var(--accent-1); }
+
+        .section-label {
+            font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--text-muted); margin: 20px 0 12px;
+        }
+
+        /* Error */
+        .error-box {
+            padding: 16px; border-radius: 12px;
+            background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3);
+            color: var(--accent-red); font-size: 0.9rem; margin-top: 16px;
+            display: none;
+        }
+        .error-box.visible { display: block; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.8rem; }
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .grade-display .grade-value { font-size: 3rem; }
+            .links-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 400px) {
+            .form-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
-<body class="p-4 sm:p-8">
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Student Performance Predictor</h1>
+            <p>Predict your final grade and get personalized improvement tips</p>
+        </div>
 
-    <div class="glass-panel w-full max-w-2xl p-8 mx-auto">
-        <h1 class="text-3xl font-bold text-center mb-2 text-indigo-900">Student Math Score Predictor</h1>
-        <p class="text-center text-gray-600 mb-8">Enter the student's details below to predict their math score.</p>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" id="tab-predict" onclick="switchTab('predict')">📊 Grade Predictor</button>
+            <button class="tab" id="tab-study" onclick="switchTab('study')">📚 Study Help</button>
+        </div>
 
-        <form id="prediction-form" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Gender -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                    <select id="gender" name="gender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
-                        <option value="female">Female</option>
-                        <option value="male">Male</option>
-                    </select>
+        <!-- ===================== PREDICT PANEL ===================== -->
+        <div class="panel active" id="panel-predict">
+            <form id="prediction-form">
+                <!-- Personal Info -->
+                <div class="card">
+                    <div class="card-title"><div class="icon">👤</div> Personal Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>School</label>
+                            <select name="school" id="school">
+                                <option value="GP">Gabriel Pereira (GP)</option>
+                                <option value="MS">Mousinho da Silveira (MS)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Sex</label>
+                            <select name="sex" id="sex">
+                                <option value="F">Female</option>
+                                <option value="M">Male</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Age</label>
+                            <input type="number" name="age" id="age" min="15" max="22" value="17">
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <select name="address" id="address">
+                                <option value="U">Urban</option>
+                                <option value="R">Rural</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Race/Ethnicity -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Race/Ethnicity</label>
-                    <select id="race/ethnicity" name="race/ethnicity" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
-                        <option value="group A">Group A</option>
-                        <option value="group B">Group B</option>
-                        <option value="group C">Group C</option>
-                        <option value="group D">Group D</option>
-                        <option value="group E">Group E</option>
-                    </select>
+                <!-- Family -->
+                <div class="card">
+                    <div class="card-title"><div class="icon">👨‍👩‍👧</div> Family Background</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Family Size</label>
+                            <select name="famsize" id="famsize">
+                                <option value="GT3">Greater than 3</option>
+                                <option value="LE3">Less or Equal to 3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Parent's Status</label>
+                            <select name="Pstatus" id="Pstatus">
+                                <option value="T">Living Together</option>
+                                <option value="A">Apart</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mother's Education</label>
+                            <select name="Medu" id="Medu">
+                                <option value="0">None</option>
+                                <option value="1">Primary (4th grade)</option>
+                                <option value="2" selected>5th-9th grade</option>
+                                <option value="3">Secondary</option>
+                                <option value="4">Higher Education</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Father's Education</label>
+                            <select name="Fedu" id="Fedu">
+                                <option value="0">None</option>
+                                <option value="1">Primary (4th grade)</option>
+                                <option value="2" selected>5th-9th grade</option>
+                                <option value="3">Secondary</option>
+                                <option value="4">Higher Education</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mother's Job</label>
+                            <select name="Mjob" id="Mjob">
+                                <option value="teacher">Teacher</option>
+                                <option value="health">Health</option>
+                                <option value="services">Civil Services</option>
+                                <option value="at_home">At Home</option>
+                                <option value="other" selected>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Father's Job</label>
+                            <select name="Fjob" id="Fjob">
+                                <option value="teacher">Teacher</option>
+                                <option value="health">Health</option>
+                                <option value="services">Civil Services</option>
+                                <option value="at_home">At Home</option>
+                                <option value="other" selected>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Guardian</label>
+                            <select name="guardian" id="guardian">
+                                <option value="mother" selected>Mother</option>
+                                <option value="father">Father</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Family Relationship (1-5)</label>
+                            <input type="number" name="famrel" id="famrel" min="1" max="5" value="4">
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Parental Education -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Parental Level of Education</label>
-                    <select id="parental level of education" name="parental level of education" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
-                        <option value="some high school">Some High School</option>
-                        <option value="high school">High School</option>
-                        <option value="some college">Some College</option>
-                        <option value="associate's degree">Associate's Degree</option>
-                        <option value="bachelor's degree">Bachelor's Degree</option>
-                        <option value="master's degree">Master's Degree</option>
-                    </select>
+                <!-- School & Study -->
+                <div class="card">
+                    <div class="card-title"><div class="icon">📝</div> School & Study Habits</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Reason for School</label>
+                            <select name="reason" id="reason">
+                                <option value="home">Close to Home</option>
+                                <option value="reputation">School Reputation</option>
+                                <option value="course" selected>Course Preference</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Travel Time</label>
+                            <select name="traveltime" id="traveltime">
+                                <option value="1" selected>&lt;15 min</option>
+                                <option value="2">15-30 min</option>
+                                <option value="3">30 min - 1 hr</option>
+                                <option value="4">&gt;1 hr</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Weekly Study Time</label>
+                            <select name="studytime" id="studytime">
+                                <option value="1">&lt;2 hours</option>
+                                <option value="2" selected>2-5 hours</option>
+                                <option value="3">5-10 hours</option>
+                                <option value="4">&gt;10 hours</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Past Failures</label>
+                            <input type="number" name="failures" id="failures" min="0" max="4" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Extra School Support</label>
+                            <select name="schoolsup" id="schoolsup">
+                                <option value="yes">Yes</option>
+                                <option value="no" selected>No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Family Support</label>
+                            <select name="famsup" id="famsup">
+                                <option value="yes" selected>Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Extra Paid Classes</label>
+                            <select name="paid" id="paid">
+                                <option value="yes">Yes</option>
+                                <option value="no" selected>No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Absences</label>
+                            <input type="number" name="absences" id="absences" min="0" max="93" value="4">
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Lunch -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Lunch</label>
-                    <select id="lunch" name="lunch" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
-                        <option value="standard">Standard</option>
-                        <option value="free/reduced">Free/Reduced</option>
-                    </select>
+                <!-- Lifestyle -->
+                <div class="card">
+                    <div class="card-title"><div class="icon">🏃</div> Lifestyle</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Extracurricular Activities</label>
+                            <select name="activities" id="activities">
+                                <option value="yes">Yes</option>
+                                <option value="no" selected>No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Attended Nursery</label>
+                            <select name="nursery" id="nursery">
+                                <option value="yes" selected>Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Wants Higher Education</label>
+                            <select name="higher" id="higher">
+                                <option value="yes" selected>Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Has Internet</label>
+                            <select name="internet" id="internet">
+                                <option value="yes" selected>Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>In Relationship</label>
+                            <select name="romantic" id="romantic">
+                                <option value="yes">Yes</option>
+                                <option value="no" selected>No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Free Time (1-5)</label>
+                            <input type="number" name="freetime" id="freetime" min="1" max="5" value="3">
+                        </div>
+                        <div class="form-group">
+                            <label>Going Out (1-5)</label>
+                            <input type="number" name="goout" id="goout" min="1" max="5" value="3">
+                        </div>
+                        <div class="form-group">
+                            <label>Health (1-5)</label>
+                            <input type="number" name="health" id="health" min="1" max="5" value="3">
+                        </div>
+                        <div class="form-group">
+                            <label>Workday Alcohol (1-5)</label>
+                            <input type="number" name="Dalc" id="Dalc" min="1" max="5" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Weekend Alcohol (1-5)</label>
+                            <input type="number" name="Walc" id="Walc" min="1" max="5" value="1">
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Test Prep -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Test Preparation Course</label>
-                    <select id="test preparation course" name="test preparation course" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
-                        <option value="none">None</option>
-                        <option value="completed">Completed</option>
-                    </select>
+                <!-- Previous Grades -->
+                <div class="card">
+                    <div class="card-title"><div class="icon">📈</div> Previous Grades (0-20)</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>1st Period Grade (G1)</label>
+                            <input type="number" name="G1" id="G1" min="0" max="20" value="10" required>
+                        </div>
+                        <div class="form-group">
+                            <label>2nd Period Grade (G2)</label>
+                            <input type="number" name="G2" id="G2" min="0" max="20" value="10" required>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Scores -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Reading Score (0-100)</label>
-                    <input type="number" id="reading score" name="reading score" min="0" max="100" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm" placeholder="e.g. 75">
+                <button type="submit" class="btn-primary" id="predict-btn">
+                    <span class="btn-text">🔮 Predict Final Grade</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+
+            <div class="error-box" id="predict-error"></div>
+
+            <!-- Results -->
+            <div class="result-area" id="result-area">
+                <div class="card">
+                    <div class="grade-display">
+                        <div class="grade-value" id="grade-value">--</div>
+                        <div class="grade-max">/ 20</div>
+                        <div class="grade-bar-container">
+                            <div class="grade-bar-bg">
+                                <div class="grade-bar-fill" id="grade-bar" style="width: 0%"></div>
+                            </div>
+                            <div class="grade-bar-labels">
+                                <span>0</span><span>5</span><span>10</span><span>15</span><span>20</span>
+                            </div>
+                        </div>
+                        <div class="grade-level" id="grade-level">--</div>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Writing Score (0-100)</label>
-                    <input type="number" id="writing score" name="writing score" min="0" max="100" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm" placeholder="e.g. 80">
+                <div class="card" id="suggestions-card" style="display:none">
+                    <div class="suggestions-title">💡 Personalized Improvement Suggestions</div>
+                    <div id="suggestions-list"></div>
                 </div>
-            </div>
-
-            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg text-lg transition duration-200 shadow-md flex items-center justify-center">
-                <span>Predict Math Score</span>
-                <svg id="loading-spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-            </button>
-        </form>
-
-        <div id="result-container" class="mt-8 hidden">
-            <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center transform transition-all duration-500 scale-95 opacity-0" id="result-box">
-                <h2 class="text-xl text-green-800 font-semibold mb-2">Predicted Math Score</h2>
-                <div class="text-5xl font-extrabold text-green-600" id="predicted-score">--</div>
             </div>
         </div>
 
-        <div id="error-container" class="mt-8 hidden">
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-                <p class="text-red-600 font-medium" id="error-message">An error occurred.</p>
+        <!-- ===================== STUDY HELP PANEL ===================== -->
+        <div class="panel" id="panel-study">
+            <div class="card">
+                <div class="card-title"><div class="icon">🔍</div> Find Study Resources</div>
+                <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                    Enter a subject you find difficult and optionally a specific topic. We'll provide concept explanations and curated YouTube tutorials to help you learn.
+                </p>
+                <div class="study-input-area">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <select name="subject" id="study-subject">
+                            <option value="mathematics">Mathematics</option>
+                            <option value="algebra">Algebra</option>
+                            <option value="geometry">Geometry</option>
+                            <option value="calculus">Calculus</option>
+                            <option value="trigonometry">Trigonometry</option>
+                            <option value="statistics">Statistics</option>
+                            <option value="physics">Physics</option>
+                            <option value="chemistry">Chemistry</option>
+                            <option value="biology">Biology</option>
+                            <option value="english">English</option>
+                            <option value="portuguese">Portuguese</option>
+                            <option value="programming">Programming</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Specific Topic (optional)</label>
+                        <input type="text" id="study-topic" placeholder="e.g. quadratic equations, derivatives...">
+                    </div>
+                </div>
+                <button type="button" class="btn-primary" id="study-btn" onclick="getStudyHelp()">
+                    <span class="btn-text">🔎 Get Study Resources</span>
+                    <div class="spinner"></div>
+                </button>
+            </div>
+
+            <div class="error-box" id="study-error"></div>
+
+            <div class="study-results" id="study-results">
+                <div class="card">
+                    <div class="card-title"><div class="icon">💡</div> <span id="study-result-title">Concept Overview</span></div>
+                    <div class="explanation-box" id="study-explanation"></div>
+                    <div id="subtopics-container"></div>
+                </div>
+
+                <div class="card">
+                    <div class="section-label">🎬 YouTube Tutorials</div>
+                    <div class="links-grid" id="youtube-links"></div>
+                </div>
+
+                <div class="card">
+                    <div class="section-label">🌐 Web Resources</div>
+                    <div class="links-grid" id="web-links"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('panel-' + tab).classList.add('active');
+        }
+
+        // ---------- PREDICT ----------
         document.getElementById('prediction-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+            const btn = document.getElementById('predict-btn');
+            const errorBox = document.getElementById('predict-error');
+            const resultArea = document.getElementById('result-area');
+
+            btn.classList.add('loading');
+            errorBox.classList.remove('visible');
+            resultArea.classList.remove('visible');
+
             const form = e.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            // Convert numerical scores
-            data['reading score'] = parseInt(data['reading score']);
-            data['writing score'] = parseInt(data['writing score']);
-
-            const btnText = form.querySelector('button span');
-            const spinner = document.getElementById('loading-spinner');
-            const resultContainer = document.getElementById('result-container');
-            const resultBox = document.getElementById('result-box');
-            const scoreDisplay = document.getElementById('predicted-score');
-            const errorContainer = document.getElementById('error-container');
-
-            // UI Loading state
-            btnText.textContent = 'Predicting...';
-            spinner.classList.remove('hidden');
-            resultContainer.classList.add('hidden');
-            errorContainer.classList.add('hidden');
-            resultBox.classList.remove('scale-100', 'opacity-100');
+            const data = {};
+            new FormData(form).forEach((val, key) => {
+                // Convert numeric fields
+                const numFields = ['age','Medu','Fedu','traveltime','studytime','failures',
+                    'famrel','freetime','goout','Dalc','Walc','health','absences','G1','G2'];
+                data[key] = numFields.includes(key) ? parseInt(val) : val;
+            });
 
             try {
-                const response = await fetch('/predict', {
+                const res = await fetch('/predict', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Server responded with ${response.status}`);
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || `Server error ${res.status}`);
                 }
-
-                const result = await response.json();
-                
-                // Show result
-                scoreDisplay.textContent = Math.round(result.predicted_math_score * 10) / 10;
-                resultContainer.classList.remove('hidden');
-                
-                // Trigger animation
-                setTimeout(() => {
-                    resultBox.classList.add('scale-100', 'opacity-100');
-                }, 50);
-
-            } catch (error) {
-                console.error('Error:', error);
-                errorContainer.classList.remove('hidden');
-                document.getElementById('error-message').textContent = "Failed to get prediction: " + error.message;
+                const result = await res.json();
+                showResults(result);
+            } catch (err) {
+                errorBox.textContent = '❌ ' + err.message;
+                errorBox.classList.add('visible');
             } finally {
-                // UI Reset state
-                btnText.textContent = 'Predict Math Score';
-                spinner.classList.add('hidden');
+                btn.classList.remove('loading');
             }
         });
+
+        function showResults(result) {
+            const resultArea = document.getElementById('result-area');
+            
+            // Grade value
+            document.getElementById('grade-value').textContent = result.predicted_grade;
+            
+            // Grade bar
+            const pct = (result.predicted_grade / 20) * 100;
+            setTimeout(() => {
+                document.getElementById('grade-bar').style.width = pct + '%';
+            }, 100);
+            
+            // Grade level badge
+            const levelEl = document.getElementById('grade-level');
+            levelEl.textContent = result.grade_level;
+            levelEl.className = 'grade-level ' + result.grade_color;
+            
+            // Suggestions
+            const suggestionsCard = document.getElementById('suggestions-card');
+            const sugList = document.getElementById('suggestions-list');
+            sugList.innerHTML = '';
+            
+            if (result.suggestions && result.suggestions.length > 0) {
+                suggestionsCard.style.display = 'block';
+                result.suggestions.forEach(s => {
+                    sugList.innerHTML += `
+                        <div class="suggestion-item">
+                            <div class="suggestion-icon">${s.icon}</div>
+                            <div class="suggestion-content">
+                                <div class="suggestion-title">
+                                    ${s.title}
+                                    <span class="priority-badge ${s.priority}">${s.priority}</span>
+                                </div>
+                                <div class="suggestion-detail">${s.detail}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                suggestionsCard.style.display = 'none';
+            }
+            
+            resultArea.classList.add('visible');
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ---------- STUDY HELP ----------
+        async function getStudyHelp() {
+            const btn = document.getElementById('study-btn');
+            const errorBox = document.getElementById('study-error');
+            const resultsDiv = document.getElementById('study-results');
+
+            btn.classList.add('loading');
+            errorBox.classList.remove('visible');
+            resultsDiv.classList.remove('visible');
+
+            const subject = document.getElementById('study-subject').value;
+            const topic = document.getElementById('study-topic').value;
+
+            try {
+                const res = await fetch('/study-help', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subject, topic })
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || `Server error ${res.status}`);
+                }
+                const result = await res.json();
+                showStudyResults(result);
+            } catch (err) {
+                errorBox.textContent = '❌ ' + err.message;
+                errorBox.classList.add('visible');
+            } finally {
+                btn.classList.remove('loading');
+            }
+        }
+
+        function showStudyResults(result) {
+            // Title
+            document.getElementById('study-result-title').textContent = 
+                result.subject + (result.topic !== 'General' ? ' — ' + result.topic : '');
+            
+            // Explanation
+            document.getElementById('study-explanation').innerHTML = result.explanation;
+            
+            // Subtopics
+            const subtopicsEl = document.getElementById('subtopics-container');
+            if (result.subtopics && result.subtopics.length > 0) {
+                subtopicsEl.innerHTML = '<div class="section-label">🏷️ Key Topics to Study</div><div class="subtopics">' +
+                    result.subtopics.map(st => 
+                        `<span class="subtopic-tag" onclick="searchSubtopic('${result.subject}', '${st}')">${st}</span>`
+                    ).join('') + '</div>';
+            } else {
+                subtopicsEl.innerHTML = '';
+            }
+            
+            // YouTube links
+            const ytEl = document.getElementById('youtube-links');
+            ytEl.innerHTML = result.youtube_links.map(l => 
+                `<a href="${l.url}" target="_blank" rel="noopener" class="link-card">
+                    <span>${l.title}</span>
+                    <span class="arrow">→</span>
+                </a>`
+            ).join('');
+            
+            // Web links
+            const webEl = document.getElementById('web-links');
+            webEl.innerHTML = result.web_links.map(l => 
+                `<a href="${l.url}" target="_blank" rel="noopener" class="link-card">
+                    <span>${l.title}</span>
+                    <span class="arrow">→</span>
+                </a>`
+            ).join('');
+            
+            document.getElementById('study-results').classList.add('visible');
+            document.getElementById('study-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function searchSubtopic(subject, subtopic) {
+            document.getElementById('study-topic').value = subtopic;
+            document.getElementById('study-subject').value = subject.toLowerCase();
+            switchTab('study');
+            getStudyHelp();
+        }
     </script>
 </body>
 </html>
